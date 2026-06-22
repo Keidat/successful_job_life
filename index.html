@@ -63,10 +63,10 @@
 
   /* 플래시카드 */
   .flash-status{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:20px;align-items:center;}
-  .flash-card-scene{width:100%;height:280px;perspective:1000px;margin-bottom:16px;}
-  .flash-card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);}
+  .flash-card-scene{width:100%;min-height:280px;perspective:1000px;margin-bottom:16px;}
+  .flash-card-inner{width:100%;height:100%;min-height:280px;position:relative;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);}
   .flash-card-scene.flipped .flash-card-inner{transform:rotateY(180deg);}
-  .flash-front,.flash-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px;text-align:center;}
+  .flash-front,.flash-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px;text-align:center;min-height:280px;}
   .flash-front{background:var(--card);border:1px solid var(--border);}
   .flash-back{background:linear-gradient(135deg,rgba(88,166,255,0.12),rgba(210,168,255,0.12));border:1px solid var(--accent4);transform:rotateY(180deg);}
   .flash-hint{font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:1px;text-transform:uppercase;}
@@ -127,9 +127,9 @@
     <div class="nav-title">📚 성공적인 직업생활</div>
     <div class="nav-sub">핵심 내용 전체 암기</div>
   </div>
-  <button class="nav-btn active" onclick="switchMode('summary',this)">📖 요약</button>
-  <button class="nav-btn" onclick="switchMode('flash',this)">🃏 플래시카드</button>
-  <button class="nav-btn" onclick="switchMode('quiz',this)">✏️ 퀴즈</button>
+  <button type="button" class="nav-btn active" onclick="switchMode('summary',this)">📖 요약</button>
+  <button type="button" class="nav-btn" onclick="switchMode('flash',this)">🃏 플래시카드</button>
+  <button type="button" class="nav-btn" onclick="switchMode('quiz',this)">✏️ 퀴즈</button>
 </nav>
 <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
 
@@ -385,14 +385,14 @@
       </div>
     </div>
   </div>
-  <button class="flip-btn" onclick="flipCard()">🔄 카드 뒤집기</button>
+  <button type="button" class="flip-btn" onclick="flipCard()">🔄 카드 뒤집기</button>
   <div class="flash-controls">
-    <button class="flash-btn unknown" onclick="markCard(false)">❌ 모름</button>
-    <button class="flash-btn knew" onclick="markCard(true)">✅ 알았음</button>
+    <button type="button" class="flash-btn unknown" onclick="markCard(false)">❌ 모름</button>
+    <button type="button" class="flash-btn knew" onclick="markCard(true)">✅ 알았음</button>
   </div>
   <div class="flash-controls">
-    <button class="flash-btn" onclick="prevCard()">◀ 이전</button>
-    <button class="flash-btn" onclick="nextCardOnly()">다음 ▶</button>
+    <button type="button" class="flash-btn" onclick="prevCard()">◀ 이전</button>
+    <button type="button" class="flash-btn" onclick="nextCardOnly()">다음 ▶</button>
   </div>
   <div style="margin-top:16px;font-size:13px;color:var(--muted);text-align:center;" id="flashProgress">알고 있음: 0개</div>
 </div>
@@ -412,12 +412,12 @@
       <div id="quizExplainText"></div>
     </div>
   </div>
-  <button class="quiz-next-btn" id="quizNextBtn" onclick="nextQuestion()">다음 문제 →</button>
+  <button type="button" class="quiz-next-btn" id="quizNextBtn" onclick="nextQuestion()">다음 문제 →</button>
   <div class="result-box" id="resultBox">
     <div class="result-score" id="resultScore"></div>
     <div class="result-label" id="resultLabel"></div>
     <div class="result-msg" id="resultMsg"></div>
-    <button class="retry-btn" onclick="startQuiz()">🔄 다시 풀기</button>
+    <button type="button" class="retry-btn" onclick="startQuiz()">🔄 다시 풀기</button>
   </div>
 </div>
 
@@ -433,6 +433,7 @@ function switchMode(mode, btn){
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('section-'+mode).classList.add('active');
   btn.classList.add('active');
+  updateProgress(0,1);
   if(mode==='flash') initFlash();
   if(mode==='quiz') startQuiz();
 }
@@ -484,10 +485,10 @@ function showFlashCard(){
   document.getElementById('flashScene').classList.remove('flipped');
   flashCards.forEach((_,i)=>{
     const d=document.getElementById('dot-'+i);
-    d.className='dot'+(knewSet.has(i)?' done':'')+(i===flashIdx?' current':'');
+    if(d) d.className='dot'+(knewSet.has(i)?' done':'')+(i===flashIdx?' current':'');
   });
   document.getElementById('flashProgress').textContent=`알고 있음: ${knewSet.size}개 / ${flashCards.length}개`;
-  updateProgress(flashIdx,flashCards.length);
+  updateProgress(flashIdx, flashCards.length);
 }
 function flipCard(){
   document.getElementById('flashScene').classList.toggle('flipped');
@@ -508,98 +509,165 @@ function nextCardOnly(){
 }
 
 // ===== 퀴즈 데이터 (20문제) =====
+// 각 문제의 opts 배열은 고정 순서로 저장, ans는 해당 인덱스를 가리킴
+// 화면에 섞어서 보여줄 때는 data-orig-idx 속성으로 원본 인덱스를 추적
 const quizBank=[
-  {q:'기업의 정의로 옳은 것은?',opts:['이윤을 추구하지 않는 비영리 조직','노동·자본·물자·기술을 투입해 재화·서비스를 생산·유통하며 이윤을 추구하는 경제 주체','정부의 지시에 따라 재화를 배급하는 기관','사회 봉사만을 목적으로 하는 단체'],ans:1,explain:'기업은 노동·자본·물자·기술을 투입하여 인간의 욕구를 충족시킬 재화·서비스를 생산·유통하는 과정에서 이윤을 추구하는 경제 주체입니다.'},
-  {q:'기업이 개인의 노동력 제공에 대해 지급하는 것은?',opts:['세금','배당금','임금','보조금'],ans:2,explain:'기업은 개인의 노동력을 제공받고 그 대가로 임금을 지급합니다.'},
-  {q:'기업의 경제적 목적은?',opts:['사회 환원','환경 보호','이윤 극대화','기업 윤리 준수'],ans:2,explain:'경제적 목적은 비용 최소화를 통한 전 과정 경제적 경영으로 이윤 극대화를 추구하는 것입니다.'},
-  {q:'기업의 사회적 목적에 해당하지 않는 것은?',opts:['기업 윤리 준수','환경보호 활동','이윤 극대화','자원봉사 활동'],ans:2,explain:'이윤 극대화는 경제적 목적입니다. 사회적 목적은 윤리 준수, 사회 환원, 사회적 책임 이행입니다.'},
-  {q:'합명회사의 특징으로 옳은 것은?',opts:['유한책임사원만으로 구성','무한책임사원과 유한책임사원 공존','전원 무한연대책임사원으로 구성','주식을 발행하여 자본 조달'],ans:2,explain:'합명회사는 2인 이상의 무한연대책임사원으로만 구성됩니다.'},
-  {q:'합자회사에서 출자만 하고 부채 책임을 지지 않는 사원은?',opts:['무한책임사원','유한책임사원','익명사원','특별사원'],ans:1,explain:'유한책임사원은 투자한 금액만 손실하며 추가 부채 책임이 없는 일종의 투자자입니다.'},
-  {q:'합자회사가 합명회사보다 유리한 점은?',opts:['책임이 더 명확함','자본 조달이 더 용이함','의사결정이 빠름','세금이 적음'],ans:1,explain:'합자회사는 유한책임사원의 존재로 자본 조달이 합명회사보다 용이합니다.'},
-  {q:'클라크 산업 분류 — 다음 중 1차 산업은?',opts:['제조업','건설업','수산업','금융업'],ans:2,explain:'1차 산업은 자연에서 직접 채취·생산하는 농업, 목축업, 수산업, 임업, 수렵업입니다.'},
-  {q:'클라크 산업 분류 — 2차 산업의 정의는?',opts:['자연에서 직접 채취','1차 산업 원료를 가공해 새 제품 생산','비물질적 생산 서비스','금융·보험 등 무형 서비스'],ans:1,explain:'2차 산업은 1차 산업에서 생산된 원료를 가공하여 새로운 제품을 생산하는 산업입니다.'},
-  {q:'다음 중 3차 산업에 해당하지 않는 것은?',opts:['금융업','관광업','광업','보험업'],ans:2,explain:'광업은 2차 산업입니다. 3차 산업은 상업, 금융업, 보험업, 운수업, 통신업, 관광업 등 서비스업입니다.'},
-  {q:'자본재의 올바른 설명은?',opts:['사람이 일상에서 직접 소비하는 재화','생산 과정의 원료나 부속품','소비재를 생산하기 위한 기계·설비·공장 건물','비물질적 서비스'],ans:2,explain:'자본재는 소비재를 생산하기 위한 생산 수단으로 기계, 설비, 공장 건물 등이 해당됩니다.'},
-  {q:'중간재의 예시로 옳은 것은?',opts:['공장 건물','밥(식품)','자동차 제조용 철강','세탁기'],ans:2,explain:'중간재는 생산 과정에 쓰이는 원료나 부속품입니다. 자동차 제조용 철강이 대표적입니다.'},
-  {q:'자본재·소비재·중간재를 올바르게 연결한 것은?',opts:['기계=소비재, 밥=자본재, 철강=중간재','기계=자본재, 밥=소비재, 철강=중간재','기계=중간재, 밥=자본재, 철강=소비재','기계=자본재, 밥=중간재, 철강=소비재'],ans:1,explain:'자본재=기계(생산수단), 소비재=밥(직접소비), 중간재=철강(생산과정 원료)입니다.'},
-  {q:'서비스 전달 시스템의 접근성 정의로 옳은 것은?',opts:['서비스 품질 자체의 우수성','고객이 얼마나 쉽게 서비스를 제공받을 수 있는 환경','서비스 가격의 적절성','종업원의 친절도만을 의미'],ans:1,explain:'접근성은 서비스를 구매하는 과정에서 고객이 얼마나 쉽게 서비스를 제공받을 수 있는 환경인가에 관한 것입니다.'},
-  {q:'접근성 요소가 아닌 것은?',opts:['종업원의 숙련도','영업시간','제품의 원가','실내 인테리어'],ans:2,explain:'제품의 원가는 접근성 요소가 아닙니다. 접근성은 종업원(수·숙련도·자세), 시간·속도, 시설 편의성으로 구성됩니다.'},
-  {q:'접근성의 종업원 관련 요소 3가지는?',opts:['임금·학력·경력','수·숙련도·서비스 자세','수·외모·나이','경력·자격증·학벌'],ans:1,explain:'접근성의 종업원 관련 요소는 종업원의 수, 숙련도, 서비스 자세입니다.'},
-  {q:'슈메너 서비스 공장의 특징은?',opts:['노동 높음, 맞춤형','설비 중심, 규격화','사람 중심, 상호작용 높음','노동 높음, 상호작용 낮음'],ans:1,explain:'서비스 공장은 설비 중심(노동↓) + 규격화(상호작용↓)로 모든 고객에게 동일 서비스를 대량 제공합니다.'},
-  {q:'다음 중 서비스 공장에 해당하는 것은?',opts:['1:1 과외','변호사 사무실','KTX','맞춤형 인테리어'],ans:2,explain:'KTX는 설비 중심의 규격화된 서비스를 대량 제공하는 서비스 공장에 해당합니다.'},
-  {q:'전문 서비스에 해당하는 것은?',opts:['놀이공원','자동세차장','비행기','세무사'],ans:3,explain:'세무사는 전문 지식과 시간을 투입해 고객 개인만을 위한 맞춤형 서비스를 제공하는 전문 서비스입니다.'},
-  {q:'슈메너 매트릭스에서 전문 서비스의 두 축 특성은?',opts:['설비 중심 + 규격화','노동 낮음 + 상호작용 낮음','사람 중심(노동 높음) + 맞춤형(상호작용 높음)','설비 중심 + 맞춤형'],ans:2,explain:'전문 서비스는 사람 중심(노동↑) + 철저한 맞춤형(상호작용↑)이 특징입니다.'},
+  {q:'기업의 정의로 옳은 것은?',
+   opts:['이윤을 추구하지 않는 비영리 조직','노동·자본·물자·기술을 투입해 재화·서비스를 생산·유통하며 이윤을 추구하는 경제 주체','정부의 지시에 따라 재화를 배급하는 기관','사회 봉사만을 목적으로 하는 단체'],
+   ans:1,explain:'기업은 노동·자본·물자·기술을 투입하여 인간의 욕구를 충족시킬 재화·서비스를 생산·유통하는 과정에서 이윤을 추구하는 경제 주체입니다.'},
+  {q:'기업이 개인의 노동력 제공에 대해 지급하는 것은?',
+   opts:['세금','배당금','임금','보조금'],
+   ans:2,explain:'기업은 개인의 노동력을 제공받고 그 대가로 임금을 지급합니다.'},
+  {q:'기업의 경제적 목적은?',
+   opts:['사회 환원','환경 보호','이윤 극대화','기업 윤리 준수'],
+   ans:2,explain:'경제적 목적은 비용 최소화를 통한 전 과정 경제적 경영으로 이윤 극대화를 추구하는 것입니다.'},
+  {q:'기업의 사회적 목적에 해당하지 않는 것은?',
+   opts:['기업 윤리 준수','환경보호 활동','이윤 극대화','자원봉사 활동'],
+   ans:2,explain:'이윤 극대화는 경제적 목적입니다. 사회적 목적은 윤리 준수, 사회 환원, 사회적 책임 이행입니다.'},
+  {q:'합명회사의 특징으로 옳은 것은?',
+   opts:['유한책임사원만으로 구성','무한책임사원과 유한책임사원 공존','전원 무한연대책임사원으로 구성','주식을 발행하여 자본 조달'],
+   ans:2,explain:'합명회사는 2인 이상의 무한연대책임사원으로만 구성됩니다.'},
+  {q:'합자회사에서 출자만 하고 부채 책임을 지지 않는 사원은?',
+   opts:['무한책임사원','유한책임사원','익명사원','특별사원'],
+   ans:1,explain:'유한책임사원은 투자한 금액만 손실하며 추가 부채 책임이 없는 일종의 투자자입니다.'},
+  {q:'합자회사가 합명회사보다 유리한 점은?',
+   opts:['책임이 더 명확함','자본 조달이 더 용이함','의사결정이 빠름','세금이 적음'],
+   ans:1,explain:'합자회사는 유한책임사원의 존재로 자본 조달이 합명회사보다 용이합니다.'},
+  {q:'클라크 산업 분류 — 다음 중 1차 산업은?',
+   opts:['제조업','건설업','수산업','금융업'],
+   ans:2,explain:'1차 산업은 자연에서 직접 채취·생산하는 농업, 목축업, 수산업, 임업, 수렵업입니다.'},
+  {q:'클라크 산업 분류 — 2차 산업의 정의는?',
+   opts:['자연에서 직접 채취','1차 산업 원료를 가공해 새 제품 생산','비물질적 생산 서비스','금융·보험 등 무형 서비스'],
+   ans:1,explain:'2차 산업은 1차 산업에서 생산된 원료를 가공하여 새로운 제품을 생산하는 산업입니다.'},
+  {q:'다음 중 3차 산업에 해당하지 않는 것은?',
+   opts:['금융업','관광업','광업','보험업'],
+   ans:2,explain:'광업은 2차 산업입니다. 3차 산업은 상업, 금융업, 보험업, 운수업, 통신업, 관광업 등 서비스업입니다.'},
+  {q:'자본재의 올바른 설명은?',
+   opts:['사람이 일상에서 직접 소비하는 재화','생산 과정의 원료나 부속품','소비재를 생산하기 위한 기계·설비·공장 건물','비물질적 서비스'],
+   ans:2,explain:'자본재는 소비재를 생산하기 위한 생산 수단으로 기계, 설비, 공장 건물 등이 해당됩니다.'},
+  {q:'중간재의 예시로 옳은 것은?',
+   opts:['공장 건물','밥(식품)','자동차 제조용 철강','세탁기'],
+   ans:2,explain:'중간재는 생산 과정에 쓰이는 원료나 부속품입니다. 자동차 제조용 철강이 대표적입니다.'},
+  {q:'자본재·소비재·중간재를 올바르게 연결한 것은?',
+   opts:['기계=소비재, 밥=자본재, 철강=중간재','기계=자본재, 밥=소비재, 철강=중간재','기계=중간재, 밥=자본재, 철강=소비재','기계=자본재, 밥=중간재, 철강=소비재'],
+   ans:1,explain:'자본재=기계(생산수단), 소비재=밥(직접소비), 중간재=철강(생산과정 원료)입니다.'},
+  {q:'서비스 전달 시스템의 접근성 정의로 옳은 것은?',
+   opts:['서비스 품질 자체의 우수성','고객이 얼마나 쉽게 서비스를 제공받을 수 있는 환경','서비스 가격의 적절성','종업원의 친절도만을 의미'],
+   ans:1,explain:'접근성은 서비스를 구매하는 과정에서 고객이 얼마나 쉽게 서비스를 제공받을 수 있는 환경인가에 관한 것입니다.'},
+  {q:'접근성 요소가 아닌 것은?',
+   opts:['종업원의 숙련도','영업시간','제품의 원가','실내 인테리어'],
+   ans:2,explain:'제품의 원가는 접근성 요소가 아닙니다. 접근성은 종업원(수·숙련도·자세), 시간·속도, 시설 편의성으로 구성됩니다.'},
+  {q:'접근성의 종업원 관련 요소 3가지는?',
+   opts:['임금·학력·경력','수·숙련도·서비스 자세','수·외모·나이','경력·자격증·학벌'],
+   ans:1,explain:'접근성의 종업원 관련 요소는 종업원의 수, 숙련도, 서비스 자세입니다.'},
+  {q:'슈메너 서비스 공장의 특징은?',
+   opts:['노동 높음, 맞춤형','설비 중심, 규격화','사람 중심, 상호작용 높음','노동 높음, 상호작용 낮음'],
+   ans:1,explain:'서비스 공장은 설비 중심(노동↓) + 규격화(상호작용↓)로 모든 고객에게 동일 서비스를 대량 제공합니다.'},
+  {q:'다음 중 서비스 공장에 해당하는 것은?',
+   opts:['1:1 과외','변호사 사무실','KTX','맞춤형 인테리어'],
+   ans:2,explain:'KTX는 설비 중심의 규격화된 서비스를 대량 제공하는 서비스 공장에 해당합니다.'},
+  {q:'전문 서비스에 해당하는 것은?',
+   opts:['놀이공원','자동세차장','비행기','세무사'],
+   ans:3,explain:'세무사는 전문 지식과 시간을 투입해 고객 개인만을 위한 맞춤형 서비스를 제공하는 전문 서비스입니다.'},
+  {q:'슈메너 매트릭스에서 전문 서비스의 두 축 특성은?',
+   opts:['설비 중심 + 규격화','노동 낮음 + 상호작용 낮음','사람 중심(노동 높음) + 맞춤형(상호작용 높음)','설비 중심 + 맞춤형'],
+   ans:2,explain:'전문 서비스는 사람 중심(노동↑) + 철저한 맞춤형(상호작용↑)이 특징입니다.'},
 ];
 
-let qIdx=0,score=0,answered=false,quizOrder=[];
-function shuffle(arr){return [...arr].sort(()=>Math.random()-0.5);}
+let qIdx=0, score=0, answered=false, quizOrder=[];
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
 
 function startQuiz(){
-  quizOrder=shuffle(quizBank);
-  qIdx=0;score=0;answered=false;
+  quizOrder = shuffle(quizBank);
+  qIdx=0; score=0; answered=false;
   document.getElementById('resultBox').classList.remove('visible');
-  document.getElementById('quizCard').style.display='';
+  document.getElementById('quizCard').style.display='block';
   document.getElementById('quizCounterLabel').style.display='';
+  document.getElementById('quizNextBtn').classList.remove('visible');
   document.getElementById('quizScore').textContent='점수 0';
   document.getElementById('quizTotal').textContent=quizOrder.length;
+  updateProgress(0, quizOrder.length);
   showQuestion();
 }
+
 function showQuestion(){
-  const q=quizOrder[qIdx];
-  answered=false;
-  document.getElementById('quizNum').textContent=qIdx+1;
-  document.getElementById('quizQuestion').textContent=q.q;
+  const q = quizOrder[qIdx];
+  answered = false;
+  document.getElementById('quizNum').textContent = qIdx+1;
+  document.getElementById('quizQuestion').textContent = q.q;
   document.getElementById('quizExplain').classList.remove('visible');
   document.getElementById('quizNextBtn').classList.remove('visible');
-  updateProgress(qIdx,quizOrder.length);
-  const optsEl=document.getElementById('quizOptions');
-  optsEl.innerHTML='';
-  shuffle(q.opts.map((o,i)=>({text:o,orig:i}))).forEach(opt=>{
-    const btn=document.createElement('button');
-    btn.className='quiz-option';
-    btn.textContent=opt.text;
-    btn.onclick=()=>selectAnswer(opt.orig,q.ans,q.explain,q.opts);
+  updateProgress(qIdx, quizOrder.length);
+
+  // 선택지를 섞을 때 원본 인덱스를 함께 보존
+  const shuffledOpts = shuffle(q.opts.map((text, origIdx) => ({ text, origIdx })));
+
+  const optsEl = document.getElementById('quizOptions');
+  optsEl.innerHTML = '';
+  shuffledOpts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'quiz-option';
+    btn.textContent = opt.text;
+    btn.dataset.origIdx = opt.origIdx;   // ← 원본 인덱스를 data 속성에 저장
+    btn.onclick = () => selectAnswer(opt.origIdx, q.ans, q.explain);
     optsEl.appendChild(btn);
   });
 }
-function selectAnswer(chosen,correct,explain,opts){
-  if(answered)return;
-  answered=true;
-  document.getElementById('quizOptions').querySelectorAll('.quiz-option').forEach(btn=>{
-    const origIdx=opts.indexOf(btn.textContent);
-    btn.disabled=true;
-    if(origIdx===correct) btn.classList.add('correct');
-    else if(origIdx===chosen) btn.classList.add('wrong');
+
+function selectAnswer(chosen, correct, explain){
+  if(answered) return;
+  answered = true;
+
+  // data-orig-idx 속성으로 정답/오답 판정 (텍스트 비교 대신)
+  document.getElementById('quizOptions').querySelectorAll('.quiz-option').forEach(btn => {
+    const origIdx = parseInt(btn.dataset.origIdx);
+    btn.disabled = true;
+    if(origIdx === correct)      btn.classList.add('correct');
+    else if(origIdx === chosen)  btn.classList.add('wrong');
   });
-  if(chosen===correct) score++;
-  document.getElementById('quizScore').textContent=`점수 ${score}`;
-  document.getElementById('quizExplainText').textContent=explain;
+
+  if(chosen === correct) score++;
+  document.getElementById('quizScore').textContent = `점수 ${score}`;
+  document.getElementById('quizExplainText').textContent = explain;
   document.getElementById('quizExplain').classList.add('visible');
   document.getElementById('quizNextBtn').classList.add('visible');
-  document.getElementById('quizNextBtn').textContent=qIdx<quizOrder.length-1?'다음 문제 →':'결과 보기 →';
+  document.getElementById('quizNextBtn').textContent =
+    qIdx < quizOrder.length-1 ? '다음 문제 →' : '결과 보기 →';
+
+  // 답 선택 즉시 진행바 업데이트
+  updateProgress(qIdx+1, quizOrder.length);
 }
+
 function nextQuestion(){
   qIdx++;
-  if(qIdx>=quizOrder.length) showResult();
+  if(qIdx >= quizOrder.length) showResult();
   else showQuestion();
 }
+
 function showResult(){
   document.getElementById('quizCard').style.display='none';
   document.getElementById('quizCounterLabel').style.display='none';
   document.getElementById('quizNextBtn').classList.remove('visible');
-  const box=document.getElementById('resultBox');
+  const box = document.getElementById('resultBox');
   box.classList.add('visible');
-  document.getElementById('resultScore').textContent=score;
-  document.getElementById('resultLabel').textContent=`/ ${quizOrder.length}문제`;
-  const pct=score/quizOrder.length;
-  let msg=pct===1?'🎉 완벽! 시험 준비 완료!':pct>=0.8?'👍 거의 다 왔어요! 틀린 것만 복습!':pct>=0.5?'📖 절반 이상! 조금 더 파이팅!':'💪 요약 탭 다시 보고 재도전!';
-  document.getElementById('resultMsg').textContent=msg;
-  updateProgress(quizOrder.length,quizOrder.length);
-}
-function updateProgress(curr,total){
-  document.getElementById('progressBar').style.width=(curr/total*100)+'%';
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultLabel').textContent = `/ ${quizOrder.length}문제`;
+  const pct = score / quizOrder.length;
+  const msg = pct===1 ? '🎉 완벽! 시험 준비 완료!'
+            : pct>=0.8 ? '👍 거의 다 왔어요! 틀린 것만 복습!'
+            : pct>=0.5 ? '📖 절반 이상! 조금 더 파이팅!'
+            :            '💪 요약 탭 다시 보고 재도전!';
+  document.getElementById('resultMsg').textContent = msg;
+  updateProgress(quizOrder.length, quizOrder.length);
 }
 
+function updateProgress(curr, total){
+  document.getElementById('progressBar').style.width = (curr/total*100) + '%';
+}
+
+// 페이지 로드 시 플래시카드 초기화
 initFlash();
 </script>
 </body>
