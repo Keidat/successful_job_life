@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>성공적인 직업생활 암기 📚</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Teko:wght@500;700&display=swap');
+  :root {
+    --bg:#0d1117;--surface:#161b22;--card:#1e2530;--border:#30363d;
+    --accent:#58a6ff;--accent2:#f78166;--accent3:#3fb950;--accent4:#d2a8ff;
+    --text:#e6edf3;--muted:#8b949e;
+    --correct:#1a4731;--wrong:#4a1a1a;--correct-border:#3fb950;--wrong-border:#f85149;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans KR',sans-serif;min-height:100vh;}
+
+  nav{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;flex-wrap:wrap;}
+  .nav-title{font-family:'Teko',sans-serif;font-size:20px;color:var(--accent);letter-spacing:1px;margin-right:auto;}
+  .nav-sub{font-size:12px;color:var(--muted);}
+  .nav-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;font-size:13px;transition:all 0.2s;}
+  .nav-btn.active,.nav-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(88,166,255,0.08);}
+
+  .progress-bar-wrap{width:100%;background:var(--card);height:4px;position:sticky;top:53px;z-index:99;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent4));transition:width 0.4s ease;}
+
+  .section{display:none;max-width:780px;margin:0 auto;padding:32px 20px 80px;}
+  .section.active{display:block;}
+
+  /* 요약 */
+  .topic{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:20px;overflow:hidden;}
+  .topic-header{padding:16px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;transition:background 0.15s;}
+  .topic-header:hover{background:rgba(255,255,255,0.03);}
+  .topic-num{font-family:'Teko',sans-serif;font-size:28px;font-weight:700;color:var(--accent2);min-width:36px;line-height:1;}
+  .topic-title{font-size:15px;font-weight:700;flex:1;line-height:1.4;}
+  .topic-tag{font-size:11px;padding:3px 8px;border-radius:20px;background:rgba(88,166,255,0.15);color:var(--accent);white-space:nowrap;}
+  .chevron{color:var(--muted);font-size:18px;transition:transform 0.25s;}
+  .topic.open .chevron{transform:rotate(90deg);}
+  .topic-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border);animation:fadeIn 0.2s ease;}
+  .topic.open .topic-body{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+
+  .keyword-box{background:var(--surface);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 16px;margin:14px 0;}
+  .keyword-box.green{border-color:var(--accent3);}
+  .keyword-box.purple{border-color:var(--accent4);}
+  .keyword-box.red{border-color:var(--accent2);}
+  .kw-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+  .kw-content{font-size:14px;line-height:1.7;color:var(--text);}
+  .kw-content strong{color:var(--accent2);}
+
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0;}
+  .compare-card{background:var(--surface);border-radius:8px;padding:14px;border:1px solid var(--border);}
+  .compare-card h4{font-size:13px;font-weight:700;margin-bottom:8px;}
+  .compare-card.blue h4{color:var(--accent);}
+  .compare-card.orange h4{color:var(--accent2);}
+  .compare-card p,.compare-card li{font-size:13px;color:#cdd9e5;line-height:1.8;}
+  .compare-card ul{padding-left:16px;}
+
+  .tag-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .tag{background:rgba(63,185,80,0.12);color:var(--accent3);border:1px solid rgba(63,185,80,0.3);padding:4px 10px;border-radius:20px;font-size:12px;}
+  .tag.blue{background:rgba(88,166,255,0.1);color:var(--accent);border-color:rgba(88,166,255,0.3);}
+  .tag.purple{background:rgba(210,168,255,0.1);color:var(--accent4);border-color:rgba(210,168,255,0.3);}
+
+  /* 플래시카드 */
+  .flash-status{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:20px;align-items:center;}
+  .flash-card-scene{width:100%;min-height:280px;perspective:1000px;margin-bottom:16px;}
+  .flash-card-inner{width:100%;height:100%;min-height:280px;position:relative;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);}
+  .flash-card-scene.flipped .flash-card-inner{transform:rotateY(180deg);}
+  .flash-front,.flash-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:28px;text-align:center;min-height:280px;}
+  .flash-front{background:var(--card);border:1px solid var(--border);}
+  .flash-back{background:linear-gradient(135deg,rgba(88,166,255,0.12),rgba(210,168,255,0.12));border:1px solid var(--accent4);transform:rotateY(180deg);}
+  .flash-hint{font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:1px;text-transform:uppercase;}
+  .flash-q{font-size:18px;font-weight:700;line-height:1.5;}
+  .flash-a{font-size:14px;line-height:1.8;color:#cdd9e5;}
+  .flash-a strong{color:var(--accent2);}
+
+  .flip-btn{width:100%;padding:14px;border-radius:10px;border:1px solid var(--accent);background:rgba(88,166,255,0.08);color:var(--accent);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.15s;margin-bottom:10px;}
+  .flip-btn:hover{background:rgba(88,166,255,0.18);}
+
+  .flash-controls{display:flex;gap:10px;margin-bottom:10px;}
+  .flash-btn{flex:1;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.15s;}
+  .flash-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .flash-btn.knew{border-color:var(--accent3);color:var(--accent3);}
+  .flash-btn.knew:hover{background:rgba(63,185,80,0.1);}
+  .flash-btn.unknown{border-color:var(--accent2);color:var(--accent2);}
+  .flash-btn.unknown:hover{background:rgba(247,129,102,0.1);}
+
+  .dot-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background 0.3s;}
+  .dot.done{background:var(--accent3);}
+  .dot.current{background:var(--accent);}
+
+  /* 퀴즈 */
+  .quiz-status{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;font-size:13px;color:var(--muted);}
+  .quiz-num-badge{background:var(--accent);color:#0d1117;font-weight:700;padding:4px 10px;border-radius:20px;font-size:12px;}
+  .quiz-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px 24px;margin-bottom:16px;}
+  .quiz-q-label{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent2);margin-bottom:12px;}
+  .quiz-question{font-size:16px;font-weight:700;line-height:1.6;margin-bottom:24px;}
+  .quiz-options{display:flex;flex-direction:column;gap:10px;}
+  .quiz-option{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 18px;cursor:pointer;font-size:14px;line-height:1.5;transition:all 0.15s;text-align:left;color:var(--text);font-family:'Noto Sans KR',sans-serif;}
+  .quiz-option:hover:not(:disabled){border-color:var(--accent);background:rgba(88,166,255,0.08);}
+  .quiz-option.correct{background:var(--correct);border-color:var(--correct-border);color:#7ee787;}
+  .quiz-option.wrong{background:var(--wrong);border-color:var(--wrong-border);color:#ff7b72;}
+  .quiz-option:disabled{cursor:default;}
+  .quiz-explain{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-top:12px;font-size:13px;line-height:1.7;color:#cdd9e5;display:none;}
+  .quiz-explain.visible{display:block;animation:fadeIn 0.2s ease;}
+  .quiz-explain .explain-label{font-weight:700;color:var(--accent4);margin-bottom:6px;}
+  .quiz-next-btn{background:var(--accent);color:#0d1117;border:none;padding:14px 28px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;width:100%;font-family:'Noto Sans KR',sans-serif;margin-top:4px;transition:opacity 0.2s;display:none;}
+  .quiz-next-btn:hover{opacity:0.85;}
+  .quiz-next-btn.visible{display:block;}
+
+  .result-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:40px 24px;text-align:center;display:none;}
+  .result-box.visible{display:block;animation:fadeIn 0.3s ease;}
+  .result-score{font-family:'Teko',sans-serif;font-size:80px;font-weight:700;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .result-label{font-size:14px;color:var(--muted);margin:8px 0 28px;}
+  .result-msg{font-size:18px;font-weight:700;margin-bottom:20px;}
+  .retry-btn{background:none;border:1px solid var(--accent);color:var(--accent);padding:12px 32px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;}
+  .retry-btn:hover{background:rgba(88,166,255,0.1);}
+
+  @media(max-width:480px){.compare-grid{grid-template-columns:1fr;}.quiz-question{font-size:15px;}.flash-q{font-size:16px;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div>
+    <div class="nav-title">📚 성공적인 직업생활</div>
+    <div class="nav-sub">핵심 내용 전체 암기</div>
+  </div>
+  <button type="button" class="nav-btn active" onclick="switchMode('summary',this)">📖 요약</button>
+  <button type="button" class="nav-btn" onclick="switchMode('flash',this)">🃏 플래시카드</button>
+  <button type="button" class="nav-btn" onclick="switchMode('quiz',this)">✏️ 퀴즈</button>
+</nav>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+
+<!-- ===== 요약 ===== -->
+<div class="section active" id="section-summary">
+
+  <div class="topic open">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">1</span>
+      <span class="topic-title">기업의 의미</span>
+      <span class="topic-tag">문제 1</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="keyword-box">
+        <div class="kw-label">정의</div>
+        <div class="kw-content">노동·자본·물자·기술 등을 투입 → 인간의 욕구를 충족시킬 재화·서비스를 생산·유통하는 과정에서 <strong>이윤을 추구하는 경제 주체</strong></div>
+      </div>
+      <div class="keyword-box green">
+        <div class="kw-label">기업의 역할</div>
+        <div class="kw-content">
+          개인의 노동력 제공 → <strong>임금 지급</strong><br>
+          정부에 <strong>세금 납부</strong><br>
+          이윤 → 사회·국가 발전의 <strong>원동력</strong> 제공
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">2</span>
+      <span class="topic-title">기업의 경제적 목적</span>
+      <span class="topic-tag">문제 2</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="keyword-box">
+        <div class="kw-label">핵심</div>
+        <div class="kw-content">재화와 노동력의 <strong>비용을 최소</strong>로 하여 투입에서 산출까지 전 과정을 경제적으로 경영 → <strong>이윤의 극대화</strong> 추구</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">3</span>
+      <span class="topic-title">기업의 사회적 목적</span>
+      <span class="topic-tag">문제 3</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="keyword-box purple">
+        <div class="kw-label">핵심</div>
+        <div class="kw-content">사회의 기대를 충족하고 <strong>기업 윤리를 준수</strong>하며 <strong>사회적 책임</strong>을 다함</div>
+      </div>
+      <div class="keyword-box green">
+        <div class="kw-label">사회 환원 방법</div>
+        <div class="kw-content">이윤의 일부 → <strong>환경보호 활동</strong>, <strong>문화·예술 활동</strong>, <strong>자원봉사 활동</strong>으로 사회에 환원 → 기업과 사회 모두 발전</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">4</span>
+      <span class="topic-title">합명회사 vs 합자회사</span>
+      <span class="topic-tag">문제 4</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="compare-grid">
+        <div class="compare-card blue">
+          <h4>합명회사</h4>
+          <ul>
+            <li>가족 공동체·혈연관계 기반</li>
+            <li>2인 이상 공동 출자</li>
+            <li>전원 <strong>무한연대책임사원</strong></li>
+            <li>회사 망하면 공동창업자 전원이 부채를 나눠 책임</li>
+          </ul>
+        </div>
+        <div class="compare-card orange">
+          <h4>합자회사</h4>
+          <ul>
+            <li>합명회사보다 <strong>자본 조달 용이</strong></li>
+            <li><strong>무한책임사원</strong>: 업무집행 + 부채 책임</li>
+            <li><strong>유한책임사원</strong>: 출자만, 부채 책임 없음</li>
+            <li>회사 망해도 투자 금액만 손실, 추가 부채 책임 없음</li>
+          </ul>
+        </div>
+      </div>
+      <div class="keyword-box red">
+        <div class="kw-label">핵심 차이</div>
+        <div class="kw-content">합명 = <strong>전원 무한책임</strong> / 합자 = <strong>무한책임 + 유한책임 사원 공존</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">5</span>
+      <span class="topic-title">클라크(C. Clark)의 산업 분류</span>
+      <span class="topic-tag">문제 5</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="keyword-box">
+        <div class="kw-label">분류 기준</div>
+        <div class="kw-content">1차 산업에서 생산된 원료를 가공하여 새로운 제품을 생산하는 산업을 <strong>2차 산업</strong>으로 분류함</div>
+      </div>
+      <div class="keyword-box">
+        <div class="kw-label">1차 산업 — 자연에서 직접 채취·생산</div>
+        <div class="tag-list"><span class="tag">농업</span><span class="tag">목축업</span><span class="tag">수산업</span><span class="tag">임업</span><span class="tag">수렵업</span></div>
+      </div>
+      <div class="keyword-box green">
+        <div class="kw-label">2차 산업 — 1차 원료를 가공하여 새 제품 생산</div>
+        <div class="tag-list"><span class="tag blue">제조업</span><span class="tag blue">건설업</span><span class="tag blue">가스·전기 공급업</span><span class="tag blue">광업</span></div>
+      </div>
+      <div class="keyword-box purple">
+        <div class="kw-label">3차 산업 — 비물질적 생산 담당 서비스업</div>
+        <div class="tag-list"><span class="tag purple">상업</span><span class="tag purple">금융업</span><span class="tag purple">보험업</span><span class="tag purple">운수업</span><span class="tag purple">통신업</span><span class="tag purple">관광업</span><span class="tag purple">선전업</span><span class="tag purple">공무</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">6</span>
+      <span class="topic-title">자본재</span>
+      <span class="topic-tag">문제 6</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="keyword-box">
+        <div class="kw-label">정의</div>
+        <div class="kw-content"><strong>소비재를 생산하기 위한 생산 수단</strong>이며, 다른 상품이나 서비스를 생산하기 위해 사용되는 기계, 설비, 공장 건물 등의 생산 수단</div>
+      </div>
+      <div class="tag-list"><span class="tag blue">기계</span><span class="tag blue">설비</span><span class="tag blue">공장 건물</span></div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">7</span>
+      <span class="topic-title">소비재</span>
+      <span class="topic-tag">문제 7</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="keyword-box green">
+        <div class="kw-label">정의</div>
+        <div class="kw-content">사람이 <strong>일상생활에서 직접 소비</strong>하는 재화</div>
+      </div>
+      <div class="tag-list"><span class="tag">음식</span><span class="tag">의류</span><span class="tag">가전제품</span></div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">8</span>
+      <span class="topic-title">중간재</span>
+      <span class="topic-tag">문제 8</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="keyword-box purple">
+        <div class="kw-label">정의</div>
+        <div class="kw-content">생산 과정에 쓰이는 <strong>원료나 부속품</strong>과 같이 중간 과정에 소요되는 재화</div>
+      </div>
+      <div class="tag-list"><span class="tag purple">철강 (자동차 제조용)</span><span class="tag purple">반도체 (전자제품용)</span></div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">9</span>
+      <span class="topic-title">서비스 전달 시스템 — 접근성</span>
+      <span class="topic-tag">문제 9</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="keyword-box">
+        <div class="kw-label">정의</div>
+        <div class="kw-content">서비스를 구매하는 과정에서 고객이 <strong>얼마나 쉽게 서비스를 제공받을 수 있는 환경</strong>인가에 관한 것</div>
+      </div>
+      <div class="keyword-box green">
+        <div class="kw-label">① 종업원 관련</div>
+        <div class="kw-content">종업원의 <strong>수</strong>, 종업원의 <strong>숙련도</strong>, 종업원의 <strong>서비스 자세</strong></div>
+      </div>
+      <div class="keyword-box purple">
+        <div class="kw-label">② 시간·속도 관련</div>
+        <div class="kw-content"><strong>영업시간</strong> 및 <strong>업무처리 속도</strong>와 <strong>접근의 편리성</strong>, 시설 이용의 편리함</div>
+      </div>
+      <div class="keyword-box red">
+        <div class="kw-label">③ 환경·시설 관련</div>
+        <div class="kw-content">소비자의 접근 편의를 위한 <strong>실내 인테리어</strong>, <strong>이용설비</strong>, <strong>사용하는 도구</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic">
+    <div class="topic-header" onclick="toggleTopic(this)">
+      <span class="topic-num">10</span>
+      <span class="topic-title">슈메너 — 서비스 공장 vs 전문 서비스</span>
+      <span class="topic-tag">문제 10</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="topic-body">
+      <div class="compare-grid">
+        <div class="compare-card blue">
+          <h4>🏭 서비스 공장</h4>
+          <ul>
+            <li><strong>설비 중심</strong> (노동 낮음)</li>
+            <li><strong>규격화</strong> (상호작용 낮음)</li>
+            <li>비싼 장비로 모든 고객에게 동일 서비스 대량 제공</li>
+            <li>예) KTX, 비행기, 놀이공원, 자동세차장</li>
+          </ul>
+        </div>
+        <div class="compare-card orange">
+          <h4>👨‍💼 전문 서비스</h4>
+          <ul>
+            <li><strong>사람 중심</strong> (노동 높음)</li>
+            <li><strong>철저한 맞춤형</strong> (상호작용 높음)</li>
+            <li>전문 지식·시간 투입, 고객 1인만을 위한 서비스</li>
+            <li>예) 변호사, 1:1 과외, 세무사, 맞춤형 인테리어</li>
+          </ul>
+        </div>
+      </div>
+      <div class="keyword-box red">
+        <div class="kw-label">핵심 비교</div>
+        <div class="kw-content">서비스 공장 = <strong>설비↑ 규격화(양)</strong> / 전문 서비스 = <strong>사람↑ 맞춤형(질)</strong></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== 플래시카드 ===== -->
+<div class="section" id="section-flash">
+  <div class="flash-status">
+    <span id="flashCounter">1 / 20</span>
+    <div class="dot-row" id="dotRow"></div>
+  </div>
+  <div class="flash-card-scene" id="flashScene">
+    <div class="flash-card-inner" id="flashInner">
+      <div class="flash-front">
+        <div class="flash-hint">아래 버튼으로 뒤집기 ▼</div>
+        <div class="flash-q" id="flashQ"></div>
+      </div>
+      <div class="flash-back">
+        <div class="flash-hint">정답 ✓</div>
+        <div class="flash-a" id="flashA"></div>
+      </div>
+    </div>
+  </div>
+  <button type="button" class="flip-btn" onclick="flipCard()">🔄 카드 뒤집기</button>
+  <div class="flash-controls">
+    <button type="button" class="flash-btn unknown" onclick="markCard(false)">❌ 모름</button>
+    <button type="button" class="flash-btn knew" onclick="markCard(true)">✅ 알았음</button>
+  </div>
+  <div class="flash-controls">
+    <button type="button" class="flash-btn" onclick="prevCard()">◀ 이전</button>
+    <button type="button" class="flash-btn" onclick="nextCardOnly()">다음 ▶</button>
+  </div>
+  <div style="margin-top:16px;font-size:13px;color:var(--muted);text-align:center;" id="flashProgress">알고 있음: 0개</div>
+</div>
+
+<!-- ===== 퀴즈 ===== -->
+<div class="section" id="section-quiz">
+  <div class="quiz-status">
+    <span id="quizCounterLabel">문제 <span id="quizNum">1</span> / <span id="quizTotal">20</span></span>
+    <span class="quiz-num-badge" id="quizScore">점수 0</span>
+  </div>
+  <div class="quiz-card" id="quizCard">
+    <div class="quiz-q-label">Q.</div>
+    <div class="quiz-question" id="quizQuestion"></div>
+    <div class="quiz-options" id="quizOptions"></div>
+    <div class="quiz-explain" id="quizExplain">
+      <div class="explain-label">💡 해설</div>
+      <div id="quizExplainText"></div>
+    </div>
+  </div>
+  <button type="button" class="quiz-next-btn" id="quizNextBtn" onclick="nextQuestion()">다음 문제 →</button>
+  <div class="result-box" id="resultBox">
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-label" id="resultLabel"></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <button type="button" class="retry-btn" onclick="startQuiz()">🔄 다시 풀기</button>
+  </div>
+</div>
+
+<script>
+// ===== 토픽 토글 =====
+function toggleTopic(header){
+  header.parentElement.classList.toggle('open');
+}
+
+// ===== 모드 전환 =====
+function switchMode(mode, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+mode).classList.add('active');
+  btn.classList.add('active');
+  updateProgress(0,1);
+  if(mode==='flash') initFlash();
+  if(mode==='quiz') startQuiz();
+}
+
+// ===== 플래시카드 데이터 (20장) =====
+const flashCards = [
+  {q:'기업이란? (정의)',a:'노동·자본·물자·기술을 투입 → 재화·서비스를 생산·유통하는 과정에서 <strong>이윤을 추구하는 경제 주체</strong>'},
+  {q:'기업이 개인과 정부에 각각 하는 것은?',a:'개인의 노동력 대가로 <strong>임금 지급</strong>, 정부에 <strong>세금 납부</strong>'},
+  {q:'기업의 이윤이 갖는 의미는?',a:'사회와 국가 발전의 <strong>원동력</strong> 제공'},
+  {q:'기업의 경제적 목적은?',a:'재화·노동력의 <strong>비용 최소화</strong> → 전 과정 경제적 경영 → <strong>이윤 극대화</strong>'},
+  {q:'기업의 사회적 목적은?',a:'사회의 기대 충족, <strong>기업 윤리 준수</strong>, 사회적 책임 이행. 이윤 일부를 <strong>환경보호·문화예술·자원봉사</strong>로 사회 환원'},
+  {q:'합명회사란?',a:'가족·혈연 기반, 2인 이상 공동 출자, <strong>전원 무한연대책임사원</strong> 구성. 망하면 공동창업자 전원이 부채 분담'},
+  {q:'합자회사란?',a:'합명회사보다 자본 조달 용이. <strong>무한책임사원</strong>(경영+부채)과 <strong>유한책임사원</strong>(출자만, 부채 책임 없음)으로 구성'},
+  {q:'합명 vs 합자 — 핵심 차이는?',a:'합명 = <strong>전원 무한책임</strong> / 합자 = <strong>무한책임 + 유한책임 사원 공존</strong>'},
+  {q:'클라크 산업 분류 — 1차 산업이란? 예시 포함.',a:'자연에서 직접 채취·생산. 예) <strong>농업, 목축업, 수산업, 임업, 수렵업</strong>'},
+  {q:'클라크 산업 분류 — 2차 산업이란? 예시 포함.',a:'1차 산업 원료를 <strong>가공</strong>해 새 제품 생산. 예) <strong>제조업, 건설업, 광업, 가스·전기 공급업</strong>'},
+  {q:'클라크 산업 분류 — 3차 산업이란? 예시 포함.',a:'<strong>비물질적 생산</strong> 담당 서비스업. 예) <strong>상업, 금융업, 보험업, 운수업, 통신업, 관광업, 선전업, 공무</strong>'},
+  {q:'자본재란?',a:'<strong>소비재를 생산하기 위한 생산 수단</strong>. 다른 상품·서비스 생산에 사용되는 <strong>기계, 설비, 공장 건물</strong>'},
+  {q:'소비재란?',a:'사람이 <strong>일상생활에서 직접 소비</strong>하는 재화'},
+  {q:'중간재란?',a:'생산 과정에 쓰이는 <strong>원료나 부속품</strong>과 같이 중간 과정에 소요되는 재화. 예) 철강(자동차용), 반도체(전자제품용)'},
+  {q:'서비스 전달 시스템에서 접근성이란?',a:'서비스 구매 과정에서 고객이 <strong>얼마나 쉽게 서비스를 제공받을 수 있는 환경</strong>인가'},
+  {q:'접근성의 3가지 요소는?',a:'① <strong>종업원</strong>(수·숙련도·서비스 자세) ② <strong>시간·속도</strong>(영업시간·업무처리 속도·접근 편리성) ③ <strong>환경·시설</strong>(실내 인테리어·이용설비·사용 도구)'},
+  {q:'슈메너 서비스 프로세스 매트릭스란?',a:'노동 집약도 × 상호작용·맞춤화 정도의 2축으로 서비스를 <strong>서비스 공장/서비스 샵/대중서비스/전문서비스</strong>로 분류'},
+  {q:'서비스 공장의 특징과 예시는?',a:'<strong>설비 중심(노동↓) + 규격화(상호작용↓)</strong> → 모든 고객에게 동일 서비스 대량 제공. 예) <strong>KTX, 비행기, 놀이공원, 자동세차장</strong>'},
+  {q:'전문 서비스의 특징과 예시는?',a:'<strong>사람 중심(노동↑) + 맞춤형(상호작용↑)</strong> → 고객 1인만을 위한 서비스. 예) <strong>변호사, 1:1 과외, 세무사, 맞춤형 인테리어 건축가</strong>'},
+  {q:'서비스 공장 vs 전문 서비스 — 핵심 비교',a:'서비스 공장 = <strong>설비↑ 규격화(양)</strong> / 전문 서비스 = <strong>사람↑ 맞춤형(질)</strong>'},
+];
+
+let flashIdx=0, knewSet=new Set();
+
+function initFlash(){
+  flashIdx=0; knewSet.clear();
+  buildDots(); showFlashCard();
+}
+function buildDots(){
+  const row=document.getElementById('dotRow');
+  row.innerHTML='';
+  flashCards.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='dot'; d.id='dot-'+i;
+    row.appendChild(d);
+  });
+}
+function showFlashCard(){
+  const card=flashCards[flashIdx];
+  document.getElementById('flashQ').innerHTML=card.q;
+  document.getElementById('flashA').innerHTML=card.a;
+  document.getElementById('flashCounter').textContent=`${flashIdx+1} / ${flashCards.length}`;
+  document.getElementById('flashScene').classList.remove('flipped');
+  flashCards.forEach((_,i)=>{
+    const d=document.getElementById('dot-'+i);
+    if(d) d.className='dot'+(knewSet.has(i)?' done':'')+(i===flashIdx?' current':'');
+  });
+  document.getElementById('flashProgress').textContent=`알고 있음: ${knewSet.size}개 / ${flashCards.length}개`;
+  updateProgress(flashIdx, flashCards.length);
+}
+function flipCard(){
+  document.getElementById('flashScene').classList.toggle('flipped');
+}
+function markCard(knew){
+  if(knew) knewSet.add(flashIdx);
+  else knewSet.delete(flashIdx);
+  flashIdx=(flashIdx+1)%flashCards.length;
+  showFlashCard();
+}
+function prevCard(){
+  flashIdx=(flashIdx-1+flashCards.length)%flashCards.length;
+  showFlashCard();
+}
+function nextCardOnly(){
+  flashIdx=(flashIdx+1)%flashCards.length;
+  showFlashCard();
+}
+
+// ===== 퀴즈 데이터 (20문제) =====
+// 각 문제의 opts 배열은 고정 순서로 저장, ans는 해당 인덱스를 가리킴
+// 화면에 섞어서 보여줄 때는 data-orig-idx 속성으로 원본 인덱스를 추적
+const quizBank=[
+  {q:'기업의 정의로 옳은 것은?',
+   opts:['이윤을 추구하지 않는 비영리 조직','노동·자본·물자·기술을 투입해 재화·서비스를 생산·유통하며 이윤을 추구하는 경제 주체','정부의 지시에 따라 재화를 배급하는 기관','사회 봉사만을 목적으로 하는 단체'],
+   ans:1,explain:'기업은 노동·자본·물자·기술을 투입하여 인간의 욕구를 충족시킬 재화·서비스를 생산·유통하는 과정에서 이윤을 추구하는 경제 주체입니다.'},
+  {q:'기업이 개인의 노동력 제공에 대해 지급하는 것은?',
+   opts:['세금','배당금','임금','보조금'],
+   ans:2,explain:'기업은 개인의 노동력을 제공받고 그 대가로 임금을 지급합니다.'},
+  {q:'기업의 경제적 목적은?',
+   opts:['사회 환원','환경 보호','이윤 극대화','기업 윤리 준수'],
+   ans:2,explain:'경제적 목적은 비용 최소화를 통한 전 과정 경제적 경영으로 이윤 극대화를 추구하는 것입니다.'},
+  {q:'기업의 사회적 목적에 해당하지 않는 것은?',
+   opts:['기업 윤리 준수','환경보호 활동','이윤 극대화','자원봉사 활동'],
+   ans:2,explain:'이윤 극대화는 경제적 목적입니다. 사회적 목적은 윤리 준수, 사회 환원, 사회적 책임 이행입니다.'},
+  {q:'합명회사의 특징으로 옳은 것은?',
+   opts:['유한책임사원만으로 구성','무한책임사원과 유한책임사원 공존','전원 무한연대책임사원으로 구성','주식을 발행하여 자본 조달'],
+   ans:2,explain:'합명회사는 2인 이상의 무한연대책임사원으로만 구성됩니다.'},
+  {q:'합자회사에서 출자만 하고 부채 책임을 지지 않는 사원은?',
+   opts:['무한책임사원','유한책임사원','익명사원','특별사원'],
+   ans:1,explain:'유한책임사원은 투자한 금액만 손실하며 추가 부채 책임이 없는 일종의 투자자입니다.'},
+  {q:'합자회사가 합명회사보다 유리한 점은?',
+   opts:['책임이 더 명확함','자본 조달이 더 용이함','의사결정이 빠름','세금이 적음'],
+   ans:1,explain:'합자회사는 유한책임사원의 존재로 자본 조달이 합명회사보다 용이합니다.'},
+  {q:'클라크 산업 분류 — 다음 중 1차 산업은?',
+   opts:['제조업','건설업','수산업','금융업'],
+   ans:2,explain:'1차 산업은 자연에서 직접 채취·생산하는 농업, 목축업, 수산업, 임업, 수렵업입니다.'},
+  {q:'클라크 산업 분류 — 2차 산업의 정의는?',
+   opts:['자연에서 직접 채취','1차 산업 원료를 가공해 새 제품 생산','비물질적 생산 서비스','금융·보험 등 무형 서비스'],
+   ans:1,explain:'2차 산업은 1차 산업에서 생산된 원료를 가공하여 새로운 제품을 생산하는 산업입니다.'},
+  {q:'다음 중 3차 산업에 해당하지 않는 것은?',
+   opts:['금융업','관광업','광업','보험업'],
+   ans:2,explain:'광업은 2차 산업입니다. 3차 산업은 상업, 금융업, 보험업, 운수업, 통신업, 관광업 등 서비스업입니다.'},
+  {q:'자본재의 올바른 설명은?',
+   opts:['사람이 일상에서 직접 소비하는 재화','생산 과정의 원료나 부속품','소비재를 생산하기 위한 기계·설비·공장 건물','비물질적 서비스'],
+   ans:2,explain:'자본재는 소비재를 생산하기 위한 생산 수단으로 기계, 설비, 공장 건물 등이 해당됩니다.'},
+  {q:'중간재의 예시로 옳은 것은?',
+   opts:['공장 건물','밥(식품)','자동차 제조용 철강','세탁기'],
+   ans:2,explain:'중간재는 생산 과정에 쓰이는 원료나 부속품입니다. 자동차 제조용 철강이 대표적입니다.'},
+  {q:'자본재·소비재·중간재를 올바르게 연결한 것은?',
+   opts:['기계=소비재, 밥=자본재, 철강=중간재','기계=자본재, 밥=소비재, 철강=중간재','기계=중간재, 밥=자본재, 철강=소비재','기계=자본재, 밥=중간재, 철강=소비재'],
+   ans:1,explain:'자본재=기계(생산수단), 소비재=밥(직접소비), 중간재=철강(생산과정 원료)입니다.'},
+  {q:'서비스 전달 시스템의 접근성 정의로 옳은 것은?',
+   opts:['서비스 품질 자체의 우수성','고객이 얼마나 쉽게 서비스를 제공받을 수 있는 환경','서비스 가격의 적절성','종업원의 친절도만을 의미'],
+   ans:1,explain:'접근성은 서비스를 구매하는 과정에서 고객이 얼마나 쉽게 서비스를 제공받을 수 있는 환경인가에 관한 것입니다.'},
+  {q:'접근성 요소가 아닌 것은?',
+   opts:['종업원의 숙련도','영업시간','제품의 원가','실내 인테리어'],
+   ans:2,explain:'제품의 원가는 접근성 요소가 아닙니다. 접근성은 종업원(수·숙련도·자세), 시간·속도, 시설 편의성으로 구성됩니다.'},
+  {q:'접근성의 종업원 관련 요소 3가지는?',
+   opts:['임금·학력·경력','수·숙련도·서비스 자세','수·외모·나이','경력·자격증·학벌'],
+   ans:1,explain:'접근성의 종업원 관련 요소는 종업원의 수, 숙련도, 서비스 자세입니다.'},
+  {q:'슈메너 서비스 공장의 특징은?',
+   opts:['노동 높음, 맞춤형','설비 중심, 규격화','사람 중심, 상호작용 높음','노동 높음, 상호작용 낮음'],
+   ans:1,explain:'서비스 공장은 설비 중심(노동↓) + 규격화(상호작용↓)로 모든 고객에게 동일 서비스를 대량 제공합니다.'},
+  {q:'다음 중 서비스 공장에 해당하는 것은?',
+   opts:['1:1 과외','변호사 사무실','KTX','맞춤형 인테리어'],
+   ans:2,explain:'KTX는 설비 중심의 규격화된 서비스를 대량 제공하는 서비스 공장에 해당합니다.'},
+  {q:'전문 서비스에 해당하는 것은?',
+   opts:['놀이공원','자동세차장','비행기','세무사'],
+   ans:3,explain:'세무사는 전문 지식과 시간을 투입해 고객 개인만을 위한 맞춤형 서비스를 제공하는 전문 서비스입니다.'},
+  {q:'슈메너 매트릭스에서 전문 서비스의 두 축 특성은?',
+   opts:['설비 중심 + 규격화','노동 낮음 + 상호작용 낮음','사람 중심(노동 높음) + 맞춤형(상호작용 높음)','설비 중심 + 맞춤형'],
+   ans:2,explain:'전문 서비스는 사람 중심(노동↑) + 철저한 맞춤형(상호작용↑)이 특징입니다.'},
+];
+
+let qIdx=0, score=0, answered=false, quizOrder=[];
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+function startQuiz(){
+  quizOrder = shuffle(quizBank);
+  qIdx=0; score=0; answered=false;
+  document.getElementById('resultBox').classList.remove('visible');
+  document.getElementById('quizCard').style.display='block';
+  document.getElementById('quizCounterLabel').style.display='';
+  document.getElementById('quizNextBtn').classList.remove('visible');
+  document.getElementById('quizScore').textContent='점수 0';
+  document.getElementById('quizTotal').textContent=quizOrder.length;
+  updateProgress(0, quizOrder.length);
+  showQuestion();
+}
+
+function showQuestion(){
+  const q = quizOrder[qIdx];
+  answered = false;
+  document.getElementById('quizNum').textContent = qIdx+1;
+  document.getElementById('quizQuestion').textContent = q.q;
+  document.getElementById('quizExplain').classList.remove('visible');
+  document.getElementById('quizNextBtn').classList.remove('visible');
+  updateProgress(qIdx, quizOrder.length);
+
+  // 선택지를 섞을 때 원본 인덱스를 함께 보존
+  const shuffledOpts = shuffle(q.opts.map((text, origIdx) => ({ text, origIdx })));
+
+  const optsEl = document.getElementById('quizOptions');
+  optsEl.innerHTML = '';
+  shuffledOpts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'quiz-option';
+    btn.textContent = opt.text;
+    btn.dataset.origIdx = opt.origIdx;   // ← 원본 인덱스를 data 속성에 저장
+    btn.onclick = () => selectAnswer(opt.origIdx, q.ans, q.explain);
+    optsEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(chosen, correct, explain){
+  if(answered) return;
+  answered = true;
+
+  // data-orig-idx 속성으로 정답/오답 판정 (텍스트 비교 대신)
+  document.getElementById('quizOptions').querySelectorAll('.quiz-option').forEach(btn => {
+    const origIdx = parseInt(btn.dataset.origIdx);
+    btn.disabled = true;
+    if(origIdx === correct)      btn.classList.add('correct');
+    else if(origIdx === chosen)  btn.classList.add('wrong');
+  });
+
+  if(chosen === correct) score++;
+  document.getElementById('quizScore').textContent = `점수 ${score}`;
+  document.getElementById('quizExplainText').textContent = explain;
+  document.getElementById('quizExplain').classList.add('visible');
+  document.getElementById('quizNextBtn').classList.add('visible');
+  document.getElementById('quizNextBtn').textContent =
+    qIdx < quizOrder.length-1 ? '다음 문제 →' : '결과 보기 →';
+
+  // 답 선택 즉시 진행바 업데이트
+  updateProgress(qIdx+1, quizOrder.length);
+}
+
+function nextQuestion(){
+  qIdx++;
+  if(qIdx >= quizOrder.length) showResult();
+  else showQuestion();
+}
+
+function showResult(){
+  document.getElementById('quizCard').style.display='none';
+  document.getElementById('quizCounterLabel').style.display='none';
+  document.getElementById('quizNextBtn').classList.remove('visible');
+  const box = document.getElementById('resultBox');
+  box.classList.add('visible');
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultLabel').textContent = `/ ${quizOrder.length}문제`;
+  const pct = score / quizOrder.length;
+  const msg = pct===1 ? '🎉 완벽! 시험 준비 완료!'
+            : pct>=0.8 ? '👍 거의 다 왔어요! 틀린 것만 복습!'
+            : pct>=0.5 ? '📖 절반 이상! 조금 더 파이팅!'
+            :            '💪 요약 탭 다시 보고 재도전!';
+  document.getElementById('resultMsg').textContent = msg;
+  updateProgress(quizOrder.length, quizOrder.length);
+}
+
+function updateProgress(curr, total){
+  document.getElementById('progressBar').style.width = (curr/total*100) + '%';
+}
+
+// 페이지 로드 시 플래시카드 초기화
+initFlash();
+</script>
+</body>
+</html>
