@@ -140,11 +140,12 @@
 <div id="home-screen">
   <div class="home-badge">📚 1학기 기말고사 대비</div>
   <h1 class="home-title">성공적인<br>직업생활 퀴즈</h1>
-  <p class="home-sub">학습할 문항을 선택하고 퀴즈를 시작하세요<br>문항마다 5~10개의 문제가 준비되어 있습니다</p>
+  <p class="home-sub">학습할 문항을 선택하고 퀴즈를 시작하세요<br>최대 25문제가 균등하게 출제됩니다</p>
   <div class="home-info">
     <div class="home-info-chip">📝 <strong>25개</strong> 단원</div>
     <div class="home-info-chip">🎲 <strong>랜덤</strong> 출제</div>
     <div class="home-info-chip">💡 <strong>즉시</strong> 해설</div>
+    <div class="home-info-chip">🔢 <strong>최대</strong> 25문제</div>
   </div>
 
   <div class="section-label">단원 선택</div>
@@ -210,23 +211,7 @@
 // ════════════════════════════════════════════
 const shuffle = arr => { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
 const LABELS = ['①','②','③','④','⑤'];
-// 단답형 정답 판정: 순서·구분자·공백 모두 무관하게 비교
-const checkSA = (input, answers) => {
-  const norm = s => s.replace(/\s/g, '').toLowerCase();
-  // 쉼표, 마침표, 슬래시, ·, 와, 과 등으로 분리 후 정렬
-  const tokenize = s => s.split(/[,·\/\n]/).map(t => norm(t)).filter(Boolean).sort().join('|');
-  const inputNorm = norm(input);
-  const inputTok = tokenize(input);
-  return answers.some(a => {
-    const aNorm = norm(a);
-    // 1) 완전 일치 (공백 제거 후)
-    if (aNorm === inputNorm) return true;
-    // 2) 토큰 집합 비교 (순서 무관, 구분자 무관)
-    const aTok = tokenize(a);
-    if (aTok === inputTok) return true;
-    return false;
-  });
-};
+const checkSA = (input, answers) => { const n = s => s.replace(/\s/g,'').toLowerCase(); return answers.some(a => n(a) === n(input)); };
 
 function pickMC(choices, answerIdx, noShuffle) {
   if (noShuffle) return { sc: choices, ai: answerIdx };
@@ -361,7 +346,7 @@ const TOPICS = [
     { type:'sa', q:'"유한 책임 회사"가 2012년에 도입된 목적을 쓰시오.', answers:['벤처기업 설립을 지원한다는 취지로 도입','벤처기업 설립 지원'], exp:'유한 책임 회사는 벤처기업 설립을 지원한다는 취지로 2012년에 도입되었습니다.' },
   ]},
 
-  // ── 14번. (11번과 동일) 직업적 성공의 필요 요소와 준비 ──
+  // ── 14번. 직업 성공 요소와 준비(심화) ──
   { id: 14, title: '직업 성공 요소와 준비(심화)', questions: [
     { type:'mc', q:'직업 준비 단계 중 "유지기(45~64세)"의 내용으로 옳은 것은?', choices:['지위와 상황 향상을 위한 지속적인 적응 과정과 노력, 초기 경력 재평가하기','효과적인 은퇴를 준비하고 새로운 역할과 활동을 찾기','자신에게 적합한 분야를 발견하고 생활의 터전을 닦는 노력','자아 개념과 관련된 능력, 태도, 흥미, 욕구 개발'], answer:0, exp:'유지기(45~64세): 지위와 상황 향상을 위한 지속 적응, 초기 경력 재평가, 중년기에 적합한 능력·역량 기르기, 강점 살리고 생산성 유지.' },
     { type:'mc', q:'직업 준비 단계 중 "쇠퇴기(65세 이후)"의 내용으로 옳지 않은 것은?', choices:['자신에게 적합한 분야를 발견하고 직업 세계에서 안정을 추구한다','효과적인 은퇴를 준비한다','새로운 역할과 활동을 찾는다','자아 존중감을 유지한다'], answer:0, exp:'"적합한 분야 발견과 직업 세계에서의 안정 추구"는 확립기(25~44세)의 활동입니다. 쇠퇴기는 은퇴 준비, 새 역할 탐색, 자아 존중감 유지.' },
@@ -370,7 +355,7 @@ const TOPICS = [
     { type:'sa', q:'직업 준비 단계에서 "탐색기"의 연령 범위를 쓰시오.', answers:['14~24세','14세~24세'], exp:'탐색기는 14~24세에 해당하는 직업 준비 단계로, 자아 검증, 직업 탐색, 직업 세계 입문 등이 이루어집니다.' },
   ]},
 
-  // ── 15번. 기업의 종류와 형태별 특징(규모) ──
+  // ── 15번. 기업의 종류(규모별·형태별) ──
   { id: 15, title: '기업의 종류(규모별·형태별)', questions: [
     { type:'mc', q:'기업을 규모에 따라 분류할 때, 옳게 나열한 것은?', choices:['대기업, 중견 기업, 중소기업','대기업, 소기업, 영세기업','주식회사, 합명회사, 협동조합','공기업, 사기업, 공사 공동 기업'], answer:0, exp:'기업은 자본 및 종업원 수 등의 규모에 따라 대기업, 중견 기업, 중소기업으로 구분됩니다.' },
     { type:'mc', q:'"유한 회사"에 대한 설명으로 옳은 것은?', choices:['합명 회사와 주식회사의 장점을 살린 2인 이상 50인 이내의 유한 책임 사원으로 구성되는 소규모 회사이다','불특정 다수로부터 자본을 조달하여 전문 경영자가 운영한다','가족 공동체 기반으로 무한 책임을 지는 사원으로만 구성된다','국가가 출자하여 공익을 목적으로 운영한다'], answer:0, exp:'유한 회사: 합명 회사와 주식회사의 장점을 결합, 2인 이상 50인 이내 유한 책임 사원으로 구성되는 소규모 회사.' },
@@ -379,7 +364,7 @@ const TOPICS = [
     { type:'sa', q:'"협동조합"의 예시를 3가지 쓰시오.', answers:['농협, 수협, 생협','농협, 수협, 새마을금고','수협, 생협, 새마을금고'], exp:'협동조합의 예: 농협, 수협, 생협, 새마을금고.' },
   ]},
 
-  // ── 16번. 기업의 종류(사기업·공기업·공사 공동 기업) ──
+  // ── 16번. 기업의 종류(공기업·사기업 등) ──
   { id: 16, title: '기업의 종류(공기업·사기업 등)', questions: [
     { type:'mc', q:'"공기업"의 설명으로 옳은 것은?', choices:['국가나 지방 자치 단체가 출자하여 공익을 목적으로 운영하는 기업 형태','민간인이 출자하여 경제적 이윤을 목적으로 경영하는 기업 형태','공기업과 사기업이 혼합된 기업 형태','다수의 사람이 공동 출자하여 설립·운영하는 기업'], answer:0, exp:'공기업: 국가나 지방 자치 단체가 출자하여 공익을 목적으로 운영하는 기업 형태.' },
     { type:'mc', q:'"공사"와 "공단"의 차이로 옳은 것은?', choices:['공사는 경제적 생산을 목적으로 하고, 공단은 국가의 경제·사회 정책상 요청을 충족시키기 위해 설립된 특수 법인이다','공사는 지방 자치 단체가 운영하고, 공단은 국가가 직접 운영한다','공사는 비영리, 공단은 영리 목적의 조직이다','공사와 공단은 설립 목적이 완전히 동일하다'], answer:0, exp:'공사: 경제적 생산을 목적으로 정부가 출자하여 설립. 공단: 경제·사회 정책상 요청을 충족하기 위해 설립된 특수 법인.' },
@@ -388,7 +373,7 @@ const TOPICS = [
     { type:'sa', q:'"국가가 소유하는 기업"을 무엇이라 하는가?', answers:['국영 기업'], exp:'국가가 소유하는 기업을 국영 기업이라 합니다. 지방 자치 단체가 운영하는 기업은 지방 공기업입니다.' },
   ]},
 
-  // ── 17~18번. 제조업의 공정 특성에 따른 생산방식 ──
+  // ── 17번. 제조업의 생산 방식 ──
   { id: 17, title: '제조업의 생산 방식', questions: [
     { type:'mc', q:'"연속 생산방식"의 특징으로 옳은 것은?', choices:['정해진 생산 공정에 따라 일정한 생산 속도로 제품을 생산하며 소품종 대량 생산체제에 적합하다','고객의 개별적인 주문에 따라 생산하는 방식이다','동일 제품을 일정한 수량만큼 필요할 때 생산하는 방식이다','시장 변화에 따라 다양한 제품을 유연하게 생산하는 방식이다'], answer:0, exp:'연속 생산방식: 정해진 공정에 따라 일정한 속도로 생산, 소품종 대량 생산체제에 적합. 어느 한 곳에 고장이 생기면 전체 공정이 정지될 수 있어 높은 신뢰성이 요구됩니다.' },
     { type:'mc', q:'"개별 생산방식"의 특징으로 옳지 않은 것은?', choices:['대량 생산에 따른 경제적 효과를 기대할 수 있어 대규모 생산에 유리하다','고객의 개별적인 주문에 따라 생산한다','다품종 소량 생산체제에 적합하다','소비자의 요구 변화에 빠르게 대응 가능하다'], answer:0, exp:'개별 생산방식은 대량 생산에 따른 경제적 효과를 기대하기 어렵습니다. 대량 생산이 어려운 제품에 유리하고 소비자 요구 변화에 빠르게 대응할 수 있습니다.' },
@@ -442,7 +427,7 @@ const TOPICS = [
     { type:'sa', q:'경영 관리 순환 과정 4단계를 쓰시오.', answers:['계획, 조직, 지휘, 통제'], exp:'경영 관리 순환 과정 4단계: 계획, 조직, 지휘, 통제.' },
   ]},
 
-  // ── 24번. 직업기초능력 분류 ──
+  // ── 24번. 직업기초능력 10가지 분류 ──
   { id: 24, title: '직업기초능력 10가지 분류', questions: [
     { type:'mc', q:'"업무를 수행할 때 다른 사람의 글과 말을 읽고 들음으로써 그 내용을 이해하고 자기가 뜻한 바를 글과 말로 정확하게 전달하는 능력"은?', choices:['의사소통 능력','자원 관리 능력','정보 능력','대인관계 능력'], answer:0, exp:'의사소통 능력: 다른 사람의 글과 말을 이해하고 자신의 뜻을 글과 말로 정확하게 전달하는 능력.' },
     { type:'mc', q:'"업무와 관련된 문제 상황이 발생하였을 때 창조적이고 논리적인 사고를 통해 이를 올바르게 인식하고 적절히 해결하는 능력"은?', choices:['문제해결 능력','정보 능력','수리 능력','기술 능력'], answer:0, exp:'문제해결 능력: 업무 관련 문제 상황에서 창조적·논리적 사고로 문제를 인식하고 해결하는 능력.' },
@@ -453,7 +438,7 @@ const TOPICS = [
     { type:'sa', q:'"업무를 수행하는 과정에서 접촉하게 되는 사람들과 문제를 일으키지 않고 원만하게 지내는 능력"은 무슨 능력인가?', answers:['대인관계 능력'], exp:'대인관계 능력: 업무 수행 중 만나는 사람들과 원만하게 지내는 능력.' },
   ]},
 
-  // ── 25번. 직무수행능력의 향상 방안 ──
+  // ── 25번. 직무수행능력 향상 방안 ──
   { id: 25, title: '직무수행능력 향상 방안', questions: [
     { type:'mc', q:'자격증 취득의 의미로 옳은 것은?', choices:['해당 분야에서 필요한 직무수행능력을 갖추었다는 증명서와 같은 역할을 한다','직업기초능력을 모두 갖추었다는 공식적인 증명이다','학교에서 배운 내용을 평가하기 위한 도구이다','취업을 위한 필수 조건이며 없으면 취업이 불가능하다'], answer:0, exp:'자격증은 해당 분야에서 필요한 직무수행능력을 갖추었다는 증명서와 같은 역할을 합니다.' },
     { type:'mc', q:'특성화 고등학생이 취득할 수 있는 자격증 등급으로 옳은 것은?', choices:['기능사 등급','기사 등급','산업 기사 등급','기술사 등급'], answer:0, exp:'특성화 고등학생은 기능사 등급 자격증을 취득할 수 있으며, 대학 진학 후에는 산업 기사·기사 등급 자격증 취득이 가능합니다.' },
@@ -510,22 +495,63 @@ function selectNone() {
 
 function updateStartBar() {
   const cnt = selectedIds.size;
-  const totalQ = TOPICS.filter(t => selectedIds.has(t.id)).reduce((s, t) => s + t.questions.length, 0);
-  document.getElementById('start-bar-info').innerHTML = `선택된 단원: <strong>${cnt}</strong>개 &nbsp;|&nbsp; 예상 문제 수: <strong>${totalQ}</strong>문제 (랜덤 출제)`;
+  const totalAvailable = TOPICS.filter(t => selectedIds.has(t.id)).reduce((s, t) => s + t.questions.length, 0);
+  const willShow = Math.min(totalAvailable, 25);
+  const limitNote = totalAvailable > 25 ? ' (최대 25문제 균등 출제)' : '';
+  document.getElementById('start-bar-info').innerHTML =
+    `선택된 단원: <strong>${cnt}</strong>개 &nbsp;|&nbsp; 출제 예정: <strong>${willShow}</strong>문제${limitNote}`;
   document.getElementById('btn-start').disabled = cnt === 0;
 }
 
 // ════════════════════════════════════════════
-// 퀴즈 로직
+// 퀴즈 로직 — startQuiz (수정된 핵심 함수)
 // ════════════════════════════════════════════
 let quizQuestions = [], currentIdx = 0, score = 0, answered = false;
 
 function startQuiz() {
-  // 선택된 단원에서 문제 수집 후 랜덤 배열
+  const selectedTopics = TOPICS.filter(t => selectedIds.has(t.id));
+  const totalAvailable = selectedTopics.reduce((s, t) => s + t.questions.length, 0);
+
   let pool = [];
-  TOPICS.filter(t => selectedIds.has(t.id)).forEach(t => {
-    t.questions.forEach(q => pool.push({ ...q, topicTitle: t.title }));
-  });
+
+  if (totalAvailable <= 25) {
+    // 총 문제 수가 25 이하 → 모든 문제 출제
+    selectedTopics.forEach(t => {
+      t.questions.forEach(q => pool.push({ ...q, topicTitle: t.title }));
+    });
+  } else {
+    // 25문제 상한 적용 — A안: 균등 배분 + 나머지 랜덤 단원에 추가
+    const n = selectedTopics.length;
+    const base = Math.floor(25 / n);
+    const extra = 25 % n;
+
+    // 나머지(extra)를 받을 단원 인덱스를 랜덤으로 선택
+    const extraIndices = new Set(
+      shuffle([...Array(n).keys()]).slice(0, extra)
+    );
+
+    selectedTopics.forEach((t, i) => {
+      let allot = base + (extraIndices.has(i) ? 1 : 0);
+      // 단원의 실제 문제 수를 초과하지 않도록 클램핑
+      allot = Math.min(allot, t.questions.length);
+      const picked = shuffle([...t.questions]).slice(0, allot);
+      picked.forEach(q => pool.push({ ...q, topicTitle: t.title }));
+    });
+
+    // 클램핑으로 인해 25개 미달인 경우 나머지에서 추가 보충
+    const shortfall = 25 - pool.length;
+    if (shortfall > 0) {
+      const usedSet = new Set(pool.map(q => q.q));
+      const remaining = [];
+      selectedTopics.forEach(t => {
+        t.questions.forEach(q => {
+          if (!usedSet.has(q.q)) remaining.push({ ...q, topicTitle: t.title });
+        });
+      });
+      shuffle(remaining).slice(0, shortfall).forEach(q => pool.push(q));
+    }
+  }
+
   quizQuestions = shuffle(pool);
   if (quizQuestions.length === 0) return;
 
