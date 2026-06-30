@@ -210,7 +210,23 @@
 // ════════════════════════════════════════════
 const shuffle = arr => { const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
 const LABELS = ['①','②','③','④','⑤'];
-const checkSA = (input, answers) => { const n = s => s.replace(/\s/g,'').toLowerCase(); return answers.some(a => n(a) === n(input)); };
+// 단답형 정답 판정: 순서·구분자·공백 모두 무관하게 비교
+const checkSA = (input, answers) => {
+  const norm = s => s.replace(/\s/g, '').toLowerCase();
+  // 쉼표, 마침표, 슬래시, ·, 와, 과 등으로 분리 후 정렬
+  const tokenize = s => s.split(/[,·\/\n]/).map(t => norm(t)).filter(Boolean).sort().join('|');
+  const inputNorm = norm(input);
+  const inputTok = tokenize(input);
+  return answers.some(a => {
+    const aNorm = norm(a);
+    // 1) 완전 일치 (공백 제거 후)
+    if (aNorm === inputNorm) return true;
+    // 2) 토큰 집합 비교 (순서 무관, 구분자 무관)
+    const aTok = tokenize(a);
+    if (aTok === inputTok) return true;
+    return false;
+  });
+};
 
 function pickMC(choices, answerIdx, noShuffle) {
   if (noShuffle) return { sc: choices, ai: answerIdx };
